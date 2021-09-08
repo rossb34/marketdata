@@ -75,14 +75,21 @@ func (m *MarketDataArchiver) rotateFile() error {
 }
 
 // Archives the message
-func (m *MarketDataArchiver) ArchiveMessage(timestamp time.Time, msg []byte) (int, error) {
+func (m *MarketDataArchiver) ArchiveMessage(timestamp time.Time, msg []byte, sep byte) (int, error) {
 	if m.checkShouldRotateFile(timestamp) {
 		if err := m.rotateFile(); err != nil {
 			return 0, err
 		}
 	}
-
-	return m.writer.Write(msg)
+	nn, err := m.writer.Write(msg)
+	if err != nil {
+		return nn, err
+	}
+	err = m.writer.WriteByte(sep)
+	if err != nil {
+		return nn, err
+	}
+	return nn + 1, nil
 }
 
 // Flushes any buffered data and closes the file

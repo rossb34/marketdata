@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -28,7 +29,12 @@ func NewMarketDataArchiver(filenamePrefix string) *MarketDataArchiver {
 
 // Gets the filename
 func (m *MarketDataArchiver) getFilename() string {
-	return fmt.Sprintf("%v%02d%02d/%v_%02d.dat", m.currentDate.year, m.currentDate.month, m.currentDate.day, m.fnamePrefix, m.currentHour)
+	return fmt.Sprintf("%v/%v_%02d.dat", m.getPath(), m.fnamePrefix, m.currentHour)
+}
+
+// Gets the path
+func (m *MarketDataArchiver) getPath() string {
+	return fmt.Sprintf("%v%02d%02d", m.currentDate.year, m.currentDate.month, m.currentDate.day)
 }
 
 // Checks if the file should be rotated
@@ -61,6 +67,12 @@ func (m *MarketDataArchiver) rotateFile() error {
 		m.file = nil
 	}
 
+	// Ensure path exists before writes
+	err := os.MkdirAll(filepath.Dir(m.getPath()), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	// Create and open the file for writing
 	file, err := os.Create(m.getFilename())
 	if err != nil {
@@ -85,6 +97,7 @@ func (m *MarketDataArchiver) ArchiveMessage(timestamp time.Time, msg []byte, sep
 	if err != nil {
 		return nn, err
 	}
+
 	err = m.writer.WriteByte(sep)
 	if err != nil {
 		return nn, err

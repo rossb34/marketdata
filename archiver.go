@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -28,12 +27,12 @@ func NewMarketDataArchiver(filenamePrefix string) *MarketDataArchiver {
 }
 
 // Gets the filename
-func (m *MarketDataArchiver) getFilename() string {
-	return fmt.Sprintf("%v/%v_%02d.dat", m.getPath(), m.fnamePrefix, m.currentHour)
+func (m *MarketDataArchiver) getFilePath() string {
+	return fmt.Sprintf("%v/%v_%02d.dat", m.getDir(), m.fnamePrefix, m.currentHour)
 }
 
 // Gets the path
-func (m *MarketDataArchiver) getPath() string {
+func (m *MarketDataArchiver) getDir() string {
 	return fmt.Sprintf("%v%02d%02d", m.currentDate.year, m.currentDate.month, m.currentDate.day)
 }
 
@@ -67,14 +66,14 @@ func (m *MarketDataArchiver) rotateFile() error {
 		m.file = nil
 	}
 
-	// Ensure path exists before writes
-	err := os.MkdirAll(filepath.Dir(m.getPath()), os.ModePerm)
+	// Ensure directory exists before creating file
+	err := os.MkdirAll(m.getDir(), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	// Create and open the file for writing
-	file, err := os.Create(m.getFilename())
+	file, err := os.Create(m.getFilePath())
 	if err != nil {
 		return err
 	}

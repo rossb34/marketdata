@@ -40,7 +40,7 @@ func TestMarketDataArchiver_getFilename(t *testing.T) {
 				writer:      tt.fields.writer,
 				file:        tt.fields.file,
 			}
-			if got := m.getFilename(); got != tt.want {
+			if got := m.getFilePath(); got != tt.want {
 				t.Errorf("MarketDataArchiver.getFilename() = %v, want %v", got, tt.want)
 			}
 		})

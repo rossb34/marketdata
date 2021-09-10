@@ -10,6 +10,7 @@ import (
 func TestMarketDataArchiver_getFilename(t *testing.T) {
 	type fields struct {
 		fnamePrefix string
+		archiveDir  string
 		currentDate UTCDate
 		currentHour int
 		writer      *bufio.Writer
@@ -22,19 +23,20 @@ func TestMarketDataArchiver_getFilename(t *testing.T) {
 	}{
 		{
 			name:   "single digit hour",
-			fields: fields{fnamePrefix: "foo", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
-			want:   "20210101/foo_01.bin",
+			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
+			want:   "archive/20210101/foo_01.dat",
 		},
 		{
 			name:   "double digit hour",
-			fields: fields{fnamePrefix: "foo", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 23},
-			want:   "20210101/foo_23.bin",
+			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 23},
+			want:   "archive/20210101/foo_23.dat",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &MarketDataArchiver{
 				fnamePrefix: tt.fields.fnamePrefix,
+				archiveDir:  tt.fields.archiveDir,
 				currentDate: tt.fields.currentDate,
 				currentHour: tt.fields.currentHour,
 				writer:      tt.fields.writer,
@@ -50,6 +52,7 @@ func TestMarketDataArchiver_getFilename(t *testing.T) {
 func TestMarketDataArchiver_checkShouldRotateFile(t *testing.T) {
 	type fields struct {
 		fnamePrefix string
+		archiveDir  string
 		currentDate UTCDate
 		currentHour int
 		writer      *bufio.Writer
@@ -66,13 +69,13 @@ func TestMarketDataArchiver_checkShouldRotateFile(t *testing.T) {
 	}{
 		{
 			name:   "Should not rotate file",
-			fields: fields{fnamePrefix: "foo", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
+			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
 			args:   args{time.Date(2021, time.January, 1, 1, 59, 59, 0, time.UTC)},
 			want:   false,
 		},
 		{
 			name:   "Should rotate file",
-			fields: fields{fnamePrefix: "foo", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
+			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
 			args:   args{time.Date(2021, time.January, 1, 2, 0, 0, 0, time.UTC)},
 			want:   true,
 		},
@@ -81,6 +84,7 @@ func TestMarketDataArchiver_checkShouldRotateFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &MarketDataArchiver{
 				fnamePrefix: tt.fields.fnamePrefix,
+				archiveDir:  tt.fields.archiveDir,
 				currentDate: tt.fields.currentDate,
 				currentHour: tt.fields.currentHour,
 				writer:      tt.fields.writer,

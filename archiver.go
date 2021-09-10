@@ -2,6 +2,7 @@ package marketdata
 
 import (
 	"bufio"
+	"compress/gzip"
 	"fmt"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ type MarketDataArchiver struct {
 	currentDate UTCDate
 	currentHour int
 	writer      *bufio.Writer
+	gzw         *gzip.Writer
 	file        *os.File
 }
 
@@ -29,7 +31,7 @@ func NewMarketDataArchiver(filenamePrefix string, archiveDir string) *MarketData
 
 // Gets the filename
 func (m *MarketDataArchiver) getFilePath() string {
-	return fmt.Sprintf("%v/%v_%02d.dat", m.getDir(), m.fnamePrefix, m.currentHour)
+	return fmt.Sprintf("%v/%v_%02d.dat.gz", m.getDir(), m.fnamePrefix, m.currentHour)
 }
 
 // Gets the path
@@ -59,6 +61,15 @@ func (m *MarketDataArchiver) rotateFile() error {
 		m.writer = nil
 	}
 
+	// Flush the gzip writer
+	if m.gzw != nil {
+		if err := m.gzw.Flush(); err != nil {
+			return err
+		}
+		m.gzw.Close()
+		m.gzw = nil
+	}
+
 	// Close the file
 	if m.file != nil {
 		if err := m.file.Close(); err != nil {
@@ -80,8 +91,11 @@ func (m *MarketDataArchiver) rotateFile() error {
 	}
 	m.file = file
 
-	// Buffered writer to wrap the file (buffer size of 4 MB)
-	m.writer = bufio.NewWriterSize(m.file, 1024*1024*4)
+	// gzip writer
+	m.gzw = gzip.NewWriter(m.file)
+
+	// Buffered writer to wrap the gzip writer (buffer size of 4 MB)
+	m.writer = bufio.NewWriterSize(m.gzw, 1024*1024*4)
 
 	return nil
 }
@@ -113,6 +127,15 @@ func (m *MarketDataArchiver) Close() error {
 			return err
 		}
 		m.writer = nil
+	}
+
+	// Flush the gzip writer
+	if m.gzw != nil {
+		if err := m.gzw.Flush(); err != nil {
+			return err
+		}
+		m.gzw.Close()
+		m.gzw = nil
 	}
 
 	// Close the file

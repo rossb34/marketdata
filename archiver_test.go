@@ -24,12 +24,12 @@ func TestMarketDataArchiver_getFilename(t *testing.T) {
 		{
 			name:   "single digit hour",
 			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 1},
-			want:   "archive/20210101/foo_01.dat",
+			want:   "archive/20210101/foo_01.dat.gz",
 		},
 		{
 			name:   "double digit hour",
 			fields: fields{fnamePrefix: "foo", archiveDir: "archive", currentDate: UTCDate{year: 2021, month: time.January, day: 1}, currentHour: 23},
-			want:   "archive/20210101/foo_23.dat",
+			want:   "archive/20210101/foo_23.dat.gz",
 		},
 	}
 	for _, tt := range tests {

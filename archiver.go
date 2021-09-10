@@ -15,14 +15,15 @@ type UTCDate struct {
 
 type MarketDataArchiver struct {
 	fnamePrefix string
+	archiveDir  string
 	currentDate UTCDate
 	currentHour int
 	writer      *bufio.Writer
 	file        *os.File
 }
 
-func NewMarketDataArchiver(filenamePrefix string) *MarketDataArchiver {
-	bfw := MarketDataArchiver{fnamePrefix: filenamePrefix}
+func NewMarketDataArchiver(filenamePrefix string, archiveDir string) *MarketDataArchiver {
+	bfw := MarketDataArchiver{fnamePrefix: filenamePrefix, archiveDir: archiveDir}
 	return &bfw
 }
 
@@ -33,7 +34,7 @@ func (m *MarketDataArchiver) getFilePath() string {
 
 // Gets the path
 func (m *MarketDataArchiver) getDir() string {
-	return fmt.Sprintf("%v%02d%02d", m.currentDate.year, m.currentDate.month, m.currentDate.day)
+	return fmt.Sprintf("%v/%v%02d%02d", m.archiveDir, m.currentDate.year, m.currentDate.month, m.currentDate.day)
 }
 
 // Checks if the file should be rotated

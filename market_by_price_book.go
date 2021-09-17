@@ -50,12 +50,12 @@ func (m *MarketByPriceBook) OnIncrementalUpdate(incremental *MDIncrementalRefres
 	// TODO: update state from incremental update message properties (e.g. )
 	for i := 0; i < len(incremental.Entries); i++ {
 		e := &incremental.Entries[i]
-		m.update(e)
+		m.Update(e)
 	}
 }
 
 // Processes a single market data entry and updates the book
-func (m *MarketByPriceBook) update(entry *MDEntry) {
+func (m *MarketByPriceBook) Update(entry *MDEntry) {
 	switch entry.Type {
 	case BID:
 		if entry.Action == DELETE {
